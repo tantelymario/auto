@@ -1,4 +1,4 @@
-class Auto {
+export class Auto {
     
   
   constructor() {
@@ -6,7 +6,4 @@ class Auto {
   }
   
    
-}
-export {
-  Auto
 }
