@@ -8,13 +8,12 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
+            "runtimeExecutable": "node",
+            "runtimeArgs": [
+              "--experimental-modules"
             ],
-            "program": "${workspaceFolder}/bin/robot.js",
-            "preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": [
-                "${workspaceFolder}/bin/**/*.js"
+            "args": [
+              "${workspaceFolder}/robot.ts"
             ]
         }
     ]

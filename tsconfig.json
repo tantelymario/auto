@@ -1,8 +1,9 @@
 {
     "compilerOptions": {
-      "target": "es2020",
-      "module": "es2020",
-      "esModuleInterop": true,
-      "outDir": "bin"
+      "noEmit":true,
+      "allowImportingTsExtensions": true,
+      "target": "es6",
+      "module": "commonjs",
+      "outDir": "dist"
     }
   }
