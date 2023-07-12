@@ -1,4 +1,6 @@
 import { createConnection } from "mysql"
+import puppeteer  from "puppeteer-extra"
+import StealthPlugin from "puppeteer-extra-plugin-stealth"
 
 export class LinkedIN {
     
@@ -15,11 +17,12 @@ export class LinkedIN {
 
 export class Data {
 
-  conn:any
+  private conn:any
 
   constructor(){
     console.log(`Creation ok`)
   }
+
 
   connection () {
     return  new Promise((resolve, reject) => {
@@ -42,14 +45,14 @@ export class Data {
         resolve(connection);
     })
   }
-  insert_data(connection:any ,table:string ,data = {}):Promise<unknown> {
+  insert_data(connection:any ,table:string ,data:any = {}):Promise<unknown> {
       return new Promise((resolve,reject) => {
           let requete = "INSERT IGNORE INTO "+table+"  ";
-          let sep = "";
-          let values = "(";
-          let data_x = [];
-          let dx = "("
-          let error = "";
+          let sep:string = "";
+          let values:string = "(";
+          let data_x:any = [];
+          let dx:string = "("
+          let error:string = "";
           for (const key in data) {
               if (Object.hasOwnProperty.call(data, key)) {
                   values  += sep + key;
@@ -73,13 +76,13 @@ export class Data {
           resolve(error);
       })
   }
-  select_data(connection:any,query=""):Promise<unknown> {
+  query(query=""):Promise<unknown> {
       return new Promise((resolve,reject) => {
           if(query == ""){
               resolve(false);
           }
           else{
-              connection.query(query, (error:any, results:any, fields:any) => {
+              this.conn.query(query, (error:any, results:any, fields:any) => {
                   if (error) {
                       resolve(error["sqlMessage"]);
                   }
@@ -101,5 +104,101 @@ export class Data {
 
       return str;
   }
+}
+
+export class Robot {
+    private page: any[] = [];
+    private current_page: any;
+    private browser:any;
+
+    constructor(){
+        console.log(`Robot created`);
+    }
+
+    public launch(navigator:string = "", datadir:string = ""):Promise<number> {
+        puppeteer.use(StealthPlugin());
+        let config = {
+            executablePath: "",
+            userDataDir: "",
+            headless: false,
+            args: ['--no-sandbox','--disable-web-security','--disable-features=IsolateOrigins']
+        };
+        navigator = navigator.trim();
+        datadir   = datadir.trim();
+
+        return new Promise (async (resolve, reject) => {
+            if(navigator != ""){
+                config.executablePath = navigator;
+    
+            }
+            if(datadir != ""){
+                config.userDataDir = datadir;
+            }
+            try{
+                this.browser = await puppeteer.launch(config);
+                console.log(`Browser launched successfully !`);
+                resolve(0);
+            }catch(Error){
+                console.log(`Error while trying to launch browser : ${Error}`);
+                reject(-1)
+            }
+        })
+       
+    }
+    close():Promise<string>{
+        return new Promise(async (resolve, reject) => {
+            await this.browser.close();
+            resolve(`Browser closed sucessfully`)
+        })
+    }
+
+    public async new_page(url:string = "www.google.com"):Promise<number> {
+        let page = await this.browser.newPage();
+        this.page.push(page);
+        let index_page = this.page.length - 1;
+        this.current_page = this.page[index_page];
+        return new Promise(async (resolve, reject) => {
+            try{
+                await this.current_page.goto(url);
+                console.log(`Success creating page : ${url}`)
+                resolve(0)
+            }catch(Error){
+                console.log(`Failed creating page : ${url}`)
+                resolve(-1)
+            }
+            
+        })
+    }
+
+    public change_page(page:number = 0):Promise<number> {
+        this.current_page = this.page[page];
+        return new Promise(async (resolve, reject)=>{
+            try{
+                await this.current_page.bringToFront();
+                resolve(0);
+            }catch(Error){
+                console.log(`Error changing page:${Error}`);
+                reject(-1);
+            }
+        })
+
+    }
+
+    public close_current_page():void {
+        try{
+            this.current_page.close();
+        }catch(Error){
+            console.log(`Error while trying to close current page ${Error}`);
+        }
+    }
+
+    public close_page(page:number = 0):void {
+        try{
+            this.current_page = this.page[page];
+        }catch(Error){
+            console.log(`Error while trying to close page: ${Error}`)
+        }
+    }
+
 }
 
