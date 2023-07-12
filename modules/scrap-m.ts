@@ -159,7 +159,7 @@ export class Robot {
         this.current_page = this.page[index_page];
         return new Promise(async (resolve, reject) => {
             try{
-                await this.current_page.goto(url);
+                await this.load_page(url);
                 console.log(`Success creating page : ${url}`)
                 resolve(0)
             }catch(Error){
@@ -198,6 +198,39 @@ export class Robot {
         }catch(Error){
             console.log(`Error while trying to close page: ${Error}`)
         }
+    }
+
+    public load_page(url:string = "", waitfor:string[], all:boolean = true):Promise<number>{
+        return new Promise(async (resolve, reject) => {
+            if(url == ""){
+                console.log(`Inserer l'url`);
+                reject(-1);
+            }
+            try{
+                await this.current_page.goto(url);
+            }catch(Error){
+                console.log(`Error while trying to load page : ${Error}`);
+                reject(-1);
+            }
+            if(waitfor != null){
+                let selector:any = [];
+                for(let x in waitfor){
+                    selector.push(this.current_page.waitForSelector(x))
+                }
+                try{
+                    if(all){
+                        await Promise.all(selector);
+                    }else{
+                        await Promise.race(selector);
+                    }
+                    
+                }catch(Error){
+                    console.log(`Error while waiting for selector : ${selector}`);
+                    reject(-1);
+                }
+            }
+            resolve(0);
+        })
     }
 
 }
