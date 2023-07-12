@@ -5,16 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "runtimeExecutable": "node",
-            "runtimeArgs": [
-              "--experimental-modules"
-            ],
-            "args": [
-              "${workspaceFolder}/robot.ts"
-            ]
+          "name": "Debug TypeScript",
+          "type": "node",
+          "request": "launch",
+          "program": "${workspaceFolder}/robot.ts",
+          "outFiles": ["${workspaceFolder}/**/*.mjs"],
+          "sourceMaps": true,
+          "console": "integratedTerminal"
         }
     ]
 }
