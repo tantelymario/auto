@@ -8,6 +8,7 @@ const selector = {
     "attribute":"src"
 };
 
+
 (async () => {
     //await data.connection();
 
@@ -17,7 +18,10 @@ const selector = {
     await robot.search("Evelyn fierce",selector["recherche"]);
     //await robot.wait('#tiles > li > a > img.ll-loaded',true);
 
-    let att = await robot.get_list_attribute('#tiles > li > a > img',"src");
+    let att = await robot.get_list_attribute('#tiles > li > a > img.ll-loaded',"src");
+    for(let i = 0; i<att.length; i++){
+        await robot.download(att[i],'data/');
+    }
     console.log(att);
 
 })();

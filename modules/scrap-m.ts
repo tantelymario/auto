@@ -2,6 +2,7 @@ import { createConnection } from "mysql"
 import { Touchscreen } from "puppeteer-core"
 import puppeteer  from "puppeteer-extra"
 import StealthPlugin from "puppeteer-extra-plugin-stealth"
+import fs from 'fs'
 
 export class LinkedIN {
     
@@ -403,6 +404,25 @@ export class Robot {
         }catch(Error){
         console.log(`Error : ${Error}`)
         }
+    }
+
+    public download(url:string, to:string): Promise<number>{
+        return new Promise(async (resolve, reject) =>{
+             try{   
+                let page = await this.browser.newPage();
+                let ccc = url.split('/');
+                let name = ccc[ccc.length -1];
+
+                const img_buffer = await page.goto(url);
+                await fs.promises.writeFile(to+name, await img_buffer.buffer());
+                await page.close();
+                
+                resolve(0);
+            }catch(Error){
+                console.log(`Error while tryng to downloed ${url} et ${Error}`);
+                resolve(-1);
+            }
+        })
     }
     async  loading_wait():Promise<void>{
         console.log('eeeee');
