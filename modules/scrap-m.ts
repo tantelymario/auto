@@ -162,7 +162,6 @@ export class Robot {
         return new Promise(async (resolve, reject) => {
             try{
                 await this.load_page(url);
-                this.current_page..setDefaultTimeout(200000);
                 console.log(`Success creating page : ${url}`)
                 resolve(0)
             }catch(Error){
@@ -219,6 +218,7 @@ export class Robot {
                 reject(-1);
             }
             try{
+                this.current_page.setDefaultTimeout(200000);
                 await this.current_page.goto(url);
                 console.log(`Success loading page ${url}`);
                 resolve(0);
@@ -331,6 +331,23 @@ export class Robot {
         })
     }
 
+    //Find keyword
+    async search(keyword:string, selector:string): Promise<void>{
+    try{
+      await this.current_page.focus(selector)
+      // Simulate Ctrl+A (select all) using the keyboard
+      await this.current_page.keyboard.down('Control');
+      await this.current_page.keyboard.press('KeyA');
+      await this.current_page.keyboard.up('Control');
+
+      // Simulate Delete key press to remove the selected text
+      await this.current_page.keyboard.press('Delete');
+      await this.current_page.type(selector,keyword)
+      await this.current_page.keyboard.press('Enter')
+    }catch(Error){
+      console.log(`Error : ${Error}`)
+    }
+  }
     private  timeout(ms: number, txt:string = 'Promise timed out'): Promise<never> {
         return new Promise((_, reject) => {
           setTimeout(() => reject(new Error(txt)), ms);
