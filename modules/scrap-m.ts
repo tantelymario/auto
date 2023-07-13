@@ -162,6 +162,7 @@ export class Robot {
         return new Promise(async (resolve, reject) => {
             try{
                 await this.load_page(url);
+                this.current_page..setDefaultTimeout(200000);
                 console.log(`Success creating page : ${url}`)
                 resolve(0)
             }catch(Error){
