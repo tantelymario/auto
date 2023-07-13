@@ -112,6 +112,7 @@ export class Robot {
     private current_page: any;
     private browser:any;
     private resultat:any;
+    private attribute:string = '';
 
     constructor(){
         console.log(`Robot created`);
@@ -246,7 +247,9 @@ export class Robot {
             }
             try{
                 if(all){
+                    console.log('Ici');
                     await Promise.race([Promise.all(selector), this.timeout(timeout,`Timeout reached for waiting selector: ${waitfor}`)]);
+                    console.log('Fin');
                 }else{
                     selector.push(this.timeout(timeout,`Timeout reached for waiting selector: ${waitfor}`));
                     await Promise.race(selector);
@@ -256,6 +259,7 @@ export class Robot {
                 console.log(`Error while waiting for selector : ${selector}`);
                 reject(-1);
             }
+            resolve(0);
         })
     }
 
@@ -319,6 +323,57 @@ export class Robot {
         })
     }
 
+    public get_attribute(selector:string, attribute:any): Promise<any>{
+        return new Promise(async (resolve, reject) => {
+            let value  = "";
+            try{
+                console.log("Attr : "+attribute)
+                this.attribute = attribute;
+                value = await this.current_page.$eval(selector, (elx:any) => elx.getAttribute(this.attribute));
+            }catch(Error){
+                console.log(`Failed to get attribute : ${Error}`);
+                reject(value);
+            }
+            resolve(value);
+        });
+    }
+
+    public get_list_attribute(selector:string,attribute:string ,secondary_selector:any = null): Promise<any>{
+        return new Promise(async (resolve, reject) => {
+            this.resultat = [];
+            let li_cartouche:any;
+            try{
+                if(secondary_selector == null){  
+                    this.resultat = await this.current_page.$$eval(selector, (elements:any,attrname:string) =>
+                        elements.map((element:any) => element.getAttribute(attrname)), attribute
+                    );
+                }else{
+                    li_cartouche = await this.current_page.$$(selector);
+                    for(const li of li_cartouche) {
+                        let txt:any;
+                        let i:number = 0;
+                        let x:any = {};
+                        for(const key in secondary_selector){
+                            try{
+                                txt =  await li.$eval(secondary_selector[key], (elx:any) => elx.getAttribute(this.attribute));
+                                x[key] = txt;
+                            }catch(Error){
+                                console.log(`Error finding element ${secondary_selector[key]}`);
+                            }
+                                    
+                        }
+                        this.resultat.push(x);
+                        i++;
+                    }
+                }
+
+            }catch(Error){
+                console.log(`Error while trying to get Text ${Error}`);
+                reject(-1);
+            }
+            resolve(this.resultat);
+        })
+    }
     public click(selector:string):Promise<number>{
         return new Promise(async (resolve, reject) =>{
             try{
@@ -333,21 +388,27 @@ export class Robot {
 
     //Find keyword
     async search(keyword:string, selector:string): Promise<void>{
-    try{
-      await this.current_page.focus(selector)
-      // Simulate Ctrl+A (select all) using the keyboard
-      await this.current_page.keyboard.down('Control');
-      await this.current_page.keyboard.press('KeyA');
-      await this.current_page.keyboard.up('Control');
+        try{
+        await this.current_page.focus(selector)
+        // Simulate Ctrl+A (select all) using the keyboard
+        await this.current_page.keyboard.down('Control');
+        await this.current_page.keyboard.press('KeyA');
+        await this.current_page.keyboard.up('Control');
 
-      // Simulate Delete key press to remove the selected text
-      await this.current_page.keyboard.press('Delete');
-      await this.current_page.type(selector,keyword)
-      await this.current_page.keyboard.press('Enter')
-    }catch(Error){
-      console.log(`Error : ${Error}`)
+        // Simulate Delete key press to remove the selected text
+        await this.current_page.keyboard.press('Delete');
+        await this.current_page.type(selector,keyword)
+        await this.current_page.keyboard.press('Enter')
+        await this.current_page.waitForNavigation({waitUntil: 'networkidle0'});
+        }catch(Error){
+        console.log(`Error : ${Error}`)
+        }
     }
-  }
+    async  loading_wait():Promise<void>{
+        console.log('eeeee');
+        await this.current_page.waitForNavigation({waitUntil: 'networkidle0'});
+        console.log('ddd');
+    }
     private  timeout(ms: number, txt:string = 'Promise timed out'): Promise<never> {
         return new Promise((_, reject) => {
           setTimeout(() => reject(new Error(txt)), ms);
