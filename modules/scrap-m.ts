@@ -125,6 +125,7 @@ export class Robot {
             executablePath: "",
             userDataDir: "",
             headless: false,
+            timeout:120000,
             args: ['--no-sandbox','--disable-web-security','--disable-features=IsolateOrigins']
         };
         navigator = navigator.trim();
@@ -156,6 +157,9 @@ export class Robot {
         })
     }
 
+    public get_current_page(): any{
+        return this.current_page;
+    }
     public async new_page(url:string = "www.google.com"):Promise<number> {
         let page = await this.browser.newPage();
         this.page.push(page);
@@ -293,6 +297,10 @@ export class Robot {
             let li_cartouche:any;
             try{
                 if(secondary_selector == null){  
+                    const elementHandle = await this.current_page.$(selector);
+                    if (elementHandle) {
+                      await elementHandle.scrollIntoViewIfNeeded();
+                    }
                     this.resultat = await this.current_page.$$eval(selector, (elements:any) =>
                         elements.map((element:any) => element.textContent)
                     );
@@ -304,6 +312,10 @@ export class Robot {
                         let x:any = {};
                         for(const key in secondary_selector){
                             try{
+                                const elementHandle = await this.current_page.$(secondary_selector[key]);
+                                if (elementHandle) {
+                                await elementHandle.scrollIntoViewIfNeeded();
+                                }
                                 txt =  await li.$eval(secondary_selector[key], (elx:any) => elx.textContent);
                                 x[key] = txt;
                             }catch(Error){
@@ -356,6 +368,10 @@ export class Robot {
                         let x:any = {};
                         for(const key in secondary_selector){
                             try{
+                                const elementHandle = await this.current_page.$(secondary_selector[key]);
+                                if (elementHandle) {
+                                  await elementHandle.scrollIntoViewIfNeeded();
+                                }
                                 txt =  await li.$eval(secondary_selector[key], (elx:any) => elx.getAttribute(this.attribute));
                                 x[key] = txt;
                             }catch(Error){
