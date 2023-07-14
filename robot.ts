@@ -15,13 +15,16 @@ const selector = {
     await robot.launch();
     await robot.new_page("https://wallpaperaccess.com/karina-aespa");
     
-    await robot.search("Evelyn fierce",selector["recherche"]);
+    // await robot.search("Evelyn fierce",selector["recherche"]);
     //await robot.wait('#tiles > li > a > img.ll-loaded',true);
 
     let att = await robot.get_list_attribute('img[data-slug="karina-aespa"]',"src");
-    /*for(let i = 0; i<att.length; i++){
-        await robot.download('att[i],'data\/');
-    }*/
     console.log(att);
+    for(let i = 0; i<att.length; i++){
+        if(att[i] != null)
+            await robot.download('https://wallpaperaccess.com'+att[i],'data/');
+    }
+
 
 })();
+

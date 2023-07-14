@@ -3,6 +3,7 @@ import { Touchscreen } from "puppeteer-core"
 import puppeteer  from "puppeteer-extra"
 import StealthPlugin from "puppeteer-extra-plugin-stealth"
 import fs from 'fs'
+import { resolveModuleName } from "typescript"
 
 export class LinkedIN {
     
@@ -239,6 +240,18 @@ export class Robot {
         })
     }
     
+    public scroll(selector:string): Promise<any>{
+        return new Promise( async (resolve, reject) => {
+            const elementHandle = await this.current_page.$(selector);
+            if (elementHandle) {
+                await this.current_page.evaluate((element:any) => {
+                element.scrollIntoView({ block: 'center', inline: 'center', behavior: 'auto' });
+                }, elementHandle);
+                await this.sleep(3000);
+            }
+            resolve(0);
+        });
+    }
     /**
      * @param waitfor : Selector to wait in array string []
      * @param all : all = true to wait for all selector, false if at least one of the selector appears
@@ -297,10 +310,6 @@ export class Robot {
             let li_cartouche:any;
             try{
                 if(secondary_selector == null){  
-                    const elementHandle = await this.current_page.$(selector);
-                    if (elementHandle) {
-                      await elementHandle.scrollIntoViewIfNeeded();
-                    }
                     this.resultat = await this.current_page.$$eval(selector, (elements:any) =>
                         elements.map((element:any) => element.textContent)
                     );
@@ -312,10 +321,7 @@ export class Robot {
                         let x:any = {};
                         for(const key in secondary_selector){
                             try{
-                                const elementHandle = await this.current_page.$(secondary_selector[key]);
-                                if (elementHandle) {
-                                await elementHandle.scrollIntoViewIfNeeded();
-                                }
+                                await this.scroll(secondary_selector[key]);
                                 txt =  await li.$eval(secondary_selector[key], (elx:any) => elx.textContent);
                                 x[key] = txt;
                             }catch(Error){
@@ -449,6 +455,14 @@ export class Robot {
         return new Promise((_, reject) => {
           setTimeout(() => reject(new Error(txt)), ms);
         });
+    }
+    private sleep(ms:number): Promise<any>{
+        return new Promise(async (resolve, reject) => {
+            const t = setTimeout(() => {
+                console.log(`Sleep ${ms}`);
+            },ms);
+            resolve(0);
+        })
     }
 
 }
