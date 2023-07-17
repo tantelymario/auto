@@ -149,7 +149,7 @@ export class Browser {
     public get_current_page(): any{
         return this.current_page;
     }
-    public async new_page(url:string = "www.google.com"):Promise<any> {
+    public async new_page(url:string = "www.google.com"):Promise<number> {
         let page = await this.browser.newPage();
         this.page.push(page);
         let index_page = this.page.length - 1;
@@ -158,10 +158,12 @@ export class Browser {
             try{
                 await this.current_page.goto(url);
                 console.log(`Success creating page : ${url}`)
+                resolve(0)
             }catch(Error){
                 console.log(`Failed creating page : ${url}`)
+                reject(-1)
             }
-            resolve(0)
+            
         })
     }
 
@@ -205,16 +207,18 @@ export class Browser {
 export class Robot {
     private page: any[] = [];
     private current_page: any;
+    private browser:any;
     private resultat:any;
     private attribute:string = '';
 
-    constructor(){
-       console.log(`Robot created`);
+    constructor(page:any){
+        this.current_page = page
+        console.log(page)
+        this.page.push(page)
+        console.log(`Robot created`);
     }
 
-    public set_page(page:any){
-        this.current_page = page
-    }
+    
     public scroll(selector:string): Promise<any>{
         return new Promise( async (resolve, reject) => {
             const elementHandle = await this.current_page.$(selector);
@@ -445,11 +449,13 @@ export class Robot {
     public download(url:string, to:string): Promise<number>{
         return new Promise(async (resolve, reject) =>{
              try{   
+                let page = await this.browser.newPage();
                 let ccc = url.split('/');
                 let name = ccc[ccc.length -1];
-                const img_buffer = await this.current_page.goto(url);
+
+                const img_buffer = await page.goto(url);
                 await fs.promises.writeFile(to+name, await img_buffer.buffer());
-                await this.current_page.goBack();
+                await page.close();
                 
                 resolve(0);
             }catch(Error){
