@@ -1,7 +1,8 @@
-import { Robot,Browser } from "./modules/scrap-m";
+import { Bot} from "./modules/bot";
+import { Browser} from "./modules/browser";
 
 const browser = new Browser();
-const robot    = new Robot();
+const robot    = new Bot();
 
 const selector = {
     "recherche":"#search",
