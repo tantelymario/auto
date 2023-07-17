@@ -1,4 +1,4 @@
-import { Data } from "./modules/scrap-m";
+import { Data } from "./modules/data";
 interface LinkedIN {
     name: string;
     age: number;
