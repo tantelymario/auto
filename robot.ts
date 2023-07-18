@@ -9,6 +9,14 @@ const selector = {
     "attribute":"src"
 };
 
+import {Proxy} from './modules/proxy'
+
+const proxy = new Proxy()
+
+(async () =>{
+    let res = await proxy.check('46.47.197.210',3128,'no')
+    console.log(res)
+})();
 
 (async () => {
 
@@ -21,7 +29,8 @@ const selector = {
     await robot.load_page("https://www.google.com/");
     await robot.search("Porn pics","textarea#APjFqb");
     await robot.click('#rso > div:nth-child(1) > div > div > div > div > div > div > div.yuRUbf > a')
-    
+    await robot.get_list_content('#list > div > div.table-responsive > div > table > tbody > tr:nth-child(1) > td:nth-child(1)')
+   
     await robot.search("Evelyn fierce",'#search');
 
     /** We list all li */
@@ -36,5 +45,5 @@ const selector = {
         }
         browser.close_current_page();
     }
-})();
+});
 
