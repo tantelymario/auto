@@ -16,7 +16,7 @@ export class Browser {
             userDataDir: "",
             headless: false,
             timeout:120000,
-            args: ['--no-sandbox','--disable-web-security','--disable-features=IsolateOrigins',`--proxy-server=51.254.121.123:8088`]
+            args: ['--no-sandbox','--disable-web-security','--disable-features=IsolateOrigins']
         };
         navigator = navigator.trim();
         datadir   = datadir.trim();
@@ -53,21 +53,41 @@ export class Browser {
     public get_current_page(): any{
         return this.current_page;
     }
-    public async new_page(url:string = "www.google.com"):Promise<any> {
+
+    public get_browser(): any{
+        return this.browser;
+    }
+    public async new_page(url:string = "",proxy:string = ""):Promise<any> {
         let page = await this.browser.newPage();
+
+        if(proxy != ""){
+            try{
+                await page.authenticate({ username: '', password: '', proxy });
+            }
+            catch(Error){
+                console.log(`Error while trying to use proxy ${Error}`)
+                return new Promise((resolve) => {
+                    resolve(0);
+                })
+            }
+        }
+
         this.page.push(page);
         let index_page = this.page.length - 1;
         this.current_page = this.page[index_page];
         return new Promise(async (resolve, reject) => {
-            try{
-                await this.current_page.goto(url);
-                console.log(`Success creating page : ${url}`)
-            }catch(Error){
-                console.log(`Failed creating page : ${url}`)
-            }
+             if(url != ''){   
+                try{
+                    await this.current_page.goto(url);
+                    console.log(`Success creating page : ${url}`)
+                }catch(Error){
+                    console.log(`Failed creating page : ${url}`)
+                }
+             }
             resolve(0)
         })
     }
+
 
     /**
      * 

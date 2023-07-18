@@ -1,6 +1,6 @@
 import fs from 'fs'
 
-export class Robot {
+export class Bot {
     private page: any[] = [];
     private current_page: any;
     private resultat:any;
