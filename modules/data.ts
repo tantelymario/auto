@@ -9,28 +9,29 @@ export class Data {
   }
 
 
-  connection () {
+  connection () : Promise<boolean>{
     return  new Promise((resolve, reject) => {
-        const connection = createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: '',
+        const connection =  createConnection({
+            host: '192.168.5.46',
+            user: 'externe',
+            password: 'externe1',
             database: 'scraping',
             charset: 'utf8mb4'
         });
         connection.connect((err:any) => {
             if (err) {
-                resolve(false);
-                console.log(err);
+                console.log(`Erreur de connection au base de donné : ${err}`);
             }
             else{
-                console.log(`Succes connection!`)
+                this.conn = connection;
+                console.log(`Succes connection!`);
+                resolve(true);
             }
           });
-        resolve(connection);
+        
     })
   }
-  insert_data(connection:any ,table:string ,data:any = {}):Promise<unknown> {
+  public insert_data(table:string ,data:any = {}):Promise<any> {
       return new Promise((resolve,reject) => {
           let requete = "INSERT IGNORE INTO "+table+"  ";
           let sep:string = "";
@@ -49,10 +50,11 @@ export class Data {
           values += ")";
           dx += ")";
           requete += values + " VALUES " + dx;
-          connection.query(requete,data_x, (err:any, results:any) => {
+          this.conn.query(requete,data_x, (err:any, results:any) => {
           if (err) {
               error =  err;
               console.log("Erreur SQL : " + error);
+              process.exit(-1);
           }
           else{
               console.log(" Query : "+requete+" OK ");
@@ -61,7 +63,7 @@ export class Data {
           resolve(error);
       })
   }
-  query(query=""):Promise<unknown> {
+  public query(query=""):Promise<unknown> {
       return new Promise((resolve,reject) => {
           if(query == ""){
               resolve(false);
@@ -70,11 +72,11 @@ export class Data {
               this.conn.query(query, (error:any, results:any, fields:any) => {
                   if (error) {
                       resolve(error["sqlMessage"]);
+                      process.exit(-1);
                   }
                   else{
                       console.log("Query ok");
                       let res = JSON.stringify(results);
-
                       resolve(JSON.parse(res));
                   }
               });
